@@ -70,6 +70,9 @@ class PluginName extends RegistrarPlugin
             ]);
 
             foreach ($response->results as $result) {
+                if ($result->premium == true) {
+                    continue;
+                }
                 $domains[] = [
                     'tld' => $result->tld,
                     'domain' => $result->sld,
@@ -79,10 +82,16 @@ class PluginName extends RegistrarPlugin
         } else {
             $response = $this->makePostRequest('v4/domains:checkAvailability', ['domainNames' => [$params['sld'] . '.' . $params['tld']]]);
 
+
+            $status = 1;
+            if ($result->purchasable == '1' && $response->premium != true) {
+                $status = 0;
+            }
+
             $domains[] = [
                 'tld' => $response->results[0]->tld,
                 'domain' => $response->results[0]->sld,
-                'status' => ($result->purchasable == '1' ? 0 : 1)
+                'status' => $status
             ];
         }
 
